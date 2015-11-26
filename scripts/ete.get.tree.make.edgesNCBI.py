@@ -27,7 +27,7 @@ print sys.argv[1];
 start = int(float(sys.argv[2]));
 print "Downloading tree..."
 if (sys.argv[1]=="1"):
-##    t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
+    #t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
     t = ncbi.get_topology(ncbi.get_descendant_taxa(2157)) ##Archaea
     print "Archaeal tree downloaded from local database"
     t.x = 6.0;
@@ -38,7 +38,7 @@ if (sys.argv[1]=="1"):
     osm = open("tree.osm", "w")
     
 if (sys.argv[1]=="2"):
-##    t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
+    #t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
     t = ncbi.get_topology(ncbi.get_descendant_taxa(2759)) ##Euka
     print "Eukaryotic tree downloaded from local database"
     t.x = -6.0;
@@ -50,7 +50,7 @@ if (sys.argv[1]=="2"):
 
 if (sys.argv[1]=="3"): 
     t = ncbi.get_topology(ncbi.get_descendant_taxa(2)) ##Bacteria
-##    t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
+    #t = ncbi.get_topology(ncbi.get_descendant_taxa(9443))
     print "Bacterial tree downloaded from local database"
     t.x = 0.0;
     t.y = -11.0;
@@ -105,7 +105,7 @@ def HalfCircPlusEllips(x,y,r,alpha, start, end,nsteps):
 #write osm elements
 #header
 ##this is only written for first case:
-if (sys.argv[1]=="1"):
+if (sys.argv[1]=="2"):
     osm.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<osm version=\"0.6\" generator=\"HomeMade python Generator using ete toolkit\" copyright=\"OpenStreetMap and D.M. de Vienne\" attribution=\"http://www.openstreetmap.org/copyright\" license=\"http://opendatacommons.org/licenses/odbl/1-0/\">\n<bounds minlat=\"-90\" minlon=\"-180\" maxlat=\"90\" maxlon=\"180\"/>\n")
     ##we create luca's node
     osm.write("<node id=\"1000000000\" visible=\"true\" lat=\"-4.226497\" lon=\"0.000000\" >\n")
@@ -122,11 +122,7 @@ def writeosmNode(node):
     osm.write("<node id=\"%d\" visible=\"true\" lat=\"%f\" lon=\"%f\">\n" % (node.id,node.y,node.x))
     osm.write(" <tag k=\"taxid\" v=\"%d\"/>\n" % (node.taxid))
     sci_name = node.sci_name
-    sci_name = sci_name.replace("<","&lt;")
-    sci_name = sci_name.replace(">","&gt;")
     common_name = node.common_name
-    common_name = common_name.replace("<","&lt;")
-    common_name = common_name.replace(">","&gt;")
     osm.write(" <tag k=\"sci_name\" v=\"%s\"/>\n" % (sci_name))
     osm.write(" <tag k=\"common_name\" v=\"%s\"/>\n" % (common_name))
     osm.write(" <tag k=\"rank\" v=\"%s\"/>\n" % (node.rank))
@@ -148,17 +144,9 @@ def writeosmWays(node, id):
     osm.write(" <tag k=\"ref\" v=\"%s\" />\n" % (groupnb))
     #we add here a name to the branches
     Upsci_name = node.up.sci_name
-    Upsci_name = Upsci_name.replace("<","&lt;")
-    Upsci_name = Upsci_name.replace(">","&gt;")
     Upcommon_name = node.up.common_name
-    Upcommon_name = Upcommon_name.replace("<","&lt;")
-    Upcommon_name = Upcommon_name.replace(">","&gt;")
     Downsci_name = node.sci_name
-    Downsci_name = Downsci_name.replace("<","&lt;")
-    Downsci_name = Downsci_name.replace(">","&gt;")
     Downcommon_name = node.common_name
-    Downcommon_name = Downcommon_name.replace("<","&lt;")
-    Downcommon_name = Downcommon_name.replace(">","&gt;")
     left = Upsci_name +  " " + Upcommon_name;
     right = Downsci_name + " " + Downcommon_name;
     if (node.x >= node.up.x): #we are on the right 
@@ -206,6 +194,7 @@ def writeosmpolyg(node, ids):
     osm.write(" <tag k=\"zoomview\" v=\"%d\" />\n" % (node.zoomview))
     osm.write(" <tag k=\"nbdesc\" v=\"%d\"/>\n" % (node.nbdesc))
     osm.write(" <tag k=\"rank\" v=\"%s\"/>\n" % (node.rank))
+    osm.write(" <tag k=\"ref\" v=\"%s\"/>\n" % (groupnb))
     osm.write("</way>\n")
 
 #write json elements
@@ -222,6 +211,16 @@ for n in t.traverse():
     for i in child: #new
         tot = tot + np.sqrt(len(i)); #new
     nbdesc = len(n);
+    ##remove special chars in names    
+    n.common_name = n.common_name.replace("&","&amp;")
+    n.common_name = n.common_name.replace('"','&quot;')
+    n.common_name = n.common_name.replace("<","&lt;")
+    n.common_name = n.common_name.replace(">","&gt;")
+    n.sci_name = n.sci_name.replace("&","&amp;")
+    n.sci_name = n.sci_name.replace('"','&quot;')
+    n.sci_name = n.sci_name.replace("<","&lt;")
+    n.sci_name = n.sci_name.replace(">","&gt;")
+
     #add parenthesis to the common name
     if n.common_name!='':
         n.common_name = "(" + n.common_name + ")"
@@ -278,7 +277,7 @@ osm.write(" <tag k=\"ref\" v=\"%s\" />\n" % groupnb)
 osm.write("</way>\n")
 
 ##osm tail (only for last)
-if (sys.argv[1]=="3"):
+if (sys.argv[1]=="2"):
     osm.write("</osm>\n")
 
 osm.close()        

@@ -1,6 +1,0 @@
-src/daemon_compat.o: src/daemon_compat.c /usr/include/stdc-predef.h \
- includes/config.h
-
-/usr/include/stdc-predef.h:
-
-includes/config.h:
